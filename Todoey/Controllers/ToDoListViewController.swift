@@ -10,7 +10,7 @@ import UIKit
 
 class ToDoListViewController: UITableViewController {
     
-    var itemArray = ["Code", "Finish Portfolio", "Find Job"]
+    var itemArray = [Item]()
     
     //sets up Persistent Local Data Storage
     let defaults = UserDefaults.standard
@@ -18,9 +18,22 @@ class ToDoListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
-            itemArray = items
-        }
+        let newItem = Item()
+        newItem.title = "Code"
+        itemArray.append(newItem)
+        
+        let newItem2 = Item()
+        newItem2.title = "Finish Portfolio"
+        itemArray.append(newItem2)
+        
+        let newItem3 = Item()
+        newItem3.title = "Finish iOS Class"
+        itemArray.append(newItem3)
+        
+        //Retrieve array from Persistant Local Data Storage
+//        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+//            itemArray = items
+//        }
         
     }
     
@@ -33,7 +46,13 @@ class ToDoListViewController: UITableViewController {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
-        cell.textLabel?.text = itemArray[indexPath.row]
+        let item = itemArray[indexPath.row]
+        
+        cell.textLabel?.text = item.title
+        
+        //setting accesspryType using Ternary operator ==>
+        //value = condition ? valueIfTrue : valueIfFalse
+        cell.accessoryType = item.done ? .checkmark : .none
         
         return cell
     }
@@ -41,15 +60,11 @@ class ToDoListViewController: UITableViewController {
     //MARK: - Tableview Delegate Methods for cell clicked
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        //Adding/Removing Checkmarks on cell clicked
-        if  tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-            
-            //remove check mark when clicked 2nd time
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        } else {
-            //add check mark to cells when clicked
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+         //Adding/Removing Checkmarks on cell clicked
+        //set property of selected item by setting it to opposite of what it was
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        
+        tableView.reloadData()
         
         //highlights selected cell for just a sec & then returns to background color
         tableView.deselectRow(at: indexPath, animated: true)
@@ -66,7 +81,10 @@ class ToDoListViewController: UITableViewController {
         //what will happen once user clicked addItemButton on our alert
             
             //add new item to List
-            self.itemArray.append(textField.text!)
+            let newItem = Item()
+            newItem.title = textField.text!
+            
+            self.itemArray.append(newItem)
             
             //items to have to Persistent Local Data Storage
             self.defaults.set(self.itemArray, forKey: "TodoListArray")
