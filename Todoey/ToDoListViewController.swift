@@ -10,7 +10,7 @@ import UIKit
 
 class ToDoListViewController: UITableViewController {
     
-    let itemArray = ["Code", "Finish Portfolio", "Find Job"]
+    var itemArray = ["Code", "Finish Portfolio", "Find Job"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,14 +45,42 @@ class ToDoListViewController: UITableViewController {
             tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
         }
         
-        //print (itemArray[indexPath.row])
-        
         //highlights selected cell for just a sec & then returns to background color
         tableView.deselectRow(at: indexPath, animated: true)
-        
-        
-        
     }
+    
+    //MARK: - Add new items
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        
+        var textField = UITextField()
+        
+        let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+        //what will happen once user clicked addItemButton on our alert
+            
+            //add new item to List
+            self.itemArray.append(textField.text!)
+            
+            
+            //reloads List to show the added item
+            self.tableView.reloadData()
+        }
+        
+        //add text field to alert
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new item"
+            
+            //extending scope of alertTextField to addButtonPressed
+            textField = alertTextField
+        }
+        
+        //activate alert popup
+        alert.addAction(action)
+        
+        present(alert, animated: true, completion: nil)
+    }
+    
 }
 
 
