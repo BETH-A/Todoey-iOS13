@@ -12,9 +12,15 @@ class ToDoListViewController: UITableViewController {
     
     var itemArray = ["Code", "Finish Portfolio", "Find Job"]
     
+    //sets up Persistent Local Data Storage
+    let defaults = UserDefaults.standard
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+            itemArray = items
+        }
         
     }
     
@@ -61,6 +67,9 @@ class ToDoListViewController: UITableViewController {
             
             //add new item to List
             self.itemArray.append(textField.text!)
+            
+            //items to have to Persistent Local Data Storage
+            self.defaults.set(self.itemArray, forKey: "TodoListArray")
             
             
             //reloads List to show the added item
