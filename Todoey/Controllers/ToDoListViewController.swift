@@ -54,6 +54,10 @@ class ToDoListViewController: UITableViewController {
         //set property of selected item by setting it to opposite of what it was
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
+        //remove item when clicked
+//        context.delete(itemArray[indexPath.row])
+//        itemArray.remove(at: indexPath.row)
+        
         self.saveItems()
         
         //highlights selected cell for just a sec & then returns to background color
@@ -109,7 +113,7 @@ class ToDoListViewController: UITableViewController {
         self.tableView.reloadData()
     }
     
-    
+    //Reading DB so don't have to call context & saveItems
     func loadItems() {
         //must specify the data output type
         let request : NSFetchRequest<Item> = Item.fetchRequest()
