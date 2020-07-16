@@ -21,9 +21,10 @@ class ToDoListViewController: UITableViewController {
         
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
+        //set Search Bar Delegate from Main.storyboard
         
         //Retrieve array from Persistant Local Data Storage
-                loadItems()
+        loadItems()
         
     }
     
@@ -55,8 +56,8 @@ class ToDoListViewController: UITableViewController {
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
         //remove item when clicked
-//        context.delete(itemArray[indexPath.row])
-//        itemArray.remove(at: indexPath.row)
+        //        context.delete(itemArray[indexPath.row])
+        //        itemArray.remove(at: indexPath.row)
         
         self.saveItems()
         
@@ -113,10 +114,10 @@ class ToDoListViewController: UITableViewController {
         self.tableView.reloadData()
     }
     
-    //Reading DB so don't have to call context & saveItems
-    func loadItems() {
+    //Reading DB so don't have to call context & saveItems - with internal & external paramater with default values
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
         //must specify the data output type
-        let request : NSFetchRequest<Item> = Item.fetchRequest()
+
         //fetches content from DB
         do {
             itemArray = try context.fetch(request)
@@ -124,5 +125,24 @@ class ToDoListViewController: UITableViewController {
             print("Error fetching context \(error)")
         }
     }
+    
+    
+}
+//MARK: - Search Bar Methods
+
+extension ToDoListViewController: UISearchBarDelegate {
+    
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        
+        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        
+        loadItems(with: request)
+    }
+    
+    
 }
 
