@@ -23,7 +23,7 @@ class ToDoListViewController: UITableViewController {
         
         
         //Retrieve array from Persistant Local Data Storage
-//        loadItems()
+                loadItems()
         
     }
     
@@ -71,12 +71,9 @@ class ToDoListViewController: UITableViewController {
             //what will happen once user clicked addItemButton on our alert
             
             //add new item to List
-            
-            
             let newItem = Item(context: self.context)
             newItem.title = textField.text!
             newItem.done = false
-            
             self.itemArray.append(newItem)
             
             self.saveItems()
@@ -102,8 +99,6 @@ class ToDoListViewController: UITableViewController {
     
     func saveItems() {
         //items to have to Persistent Local Data Storage
-        
-        
         do{
             try context.save()
         } catch {
@@ -115,14 +110,15 @@ class ToDoListViewController: UITableViewController {
     }
     
     
-//    func loadItems() {
-//        let data = try? Data(contentsOf: dataFilePath!)
-//        let decoder = PropertyListDecoder()
-//        do{
-//            itemArray = try decoder.decode([Item].self, from: data!)
-//        } catch {
-//            print("Error encoding itemArray, \(error)")
-//        }
-//    }
+    func loadItems() {
+        //must specify the data output type
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        //fetches content from DB
+        do {
+            itemArray = try context.fetch(request)
+        } catch {
+            print("Error fetching context \(error)")
+        }
+    }
 }
 
