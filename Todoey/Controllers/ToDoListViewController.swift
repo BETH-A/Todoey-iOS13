@@ -12,28 +12,15 @@ class ToDoListViewController: UITableViewController {
     
     var itemArray = [Item]()
     
-    //sets up Persistent Local Data Storage
-    let defaults = UserDefaults.standard
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let newItem = Item()
-        newItem.title = "Code"
-        itemArray.append(newItem)
-        
-        let newItem2 = Item()
-        newItem2.title = "Finish Portfolio"
-        itemArray.append(newItem2)
-        
-        let newItem3 = Item()
-        newItem3.title = "Finish iOS Class"
-        itemArray.append(newItem3)
+        print(dataFilePath)
         
         //Retrieve array from Persistant Local Data Storage
-//        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
-//            itemArray = items
-//        }
+        loadItems()
         
     }
     
@@ -60,11 +47,11 @@ class ToDoListViewController: UITableViewController {
     //MARK: - Tableview Delegate Methods for cell clicked
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-         //Adding/Removing Checkmarks on cell clicked
+        //Adding/Removing Checkmarks on cell clicked
         //set property of selected item by setting it to opposite of what it was
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
-        tableView.reloadData()
+        self.saveItems()
         
         //highlights selected cell for just a sec & then returns to background color
         tableView.deselectRow(at: indexPath, animated: true)
@@ -78,7 +65,7 @@ class ToDoListViewController: UITableViewController {
         let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
         
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
-        //what will happen once user clicked addItemButton on our alert
+            //what will happen once user clicked addItemButton on our alert
             
             //add new item to List
             let newItem = Item()
@@ -86,12 +73,7 @@ class ToDoListViewController: UITableViewController {
             
             self.itemArray.append(newItem)
             
-            //items to have to Persistent Local Data Storage
-            self.defaults.set(self.itemArray, forKey: "TodoListArray")
-            
-            
-            //reloads List to show the added item
-            self.tableView.reloadData()
+            self.saveItems()
         }
         
         //add text field to alert
@@ -108,9 +90,35 @@ class ToDoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
+    
+    
+    //MARK: - Model Manupulation Methods
+    
+    func saveItems() {
+        //items to have to Persistent Local Data Storage
+        let encoder = PropertyListEncoder()
+        
+        
+        do{
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Error encoding itemArray, \(error)")
+        }
+        
+        //reloads List to show the added item
+        self.tableView.reloadData()
+    }
+    
+    
+    func loadItems() {
+        let data = try? Data(contentsOf: dataFilePath!)
+        let decoder = PropertyListDecoder()
+        do{
+            itemArray = try decoder.decode([Item].self, from: data!)
+        } catch {
+            print("Error encoding itemArray, \(error)")
+        }
+    }
 }
-
-
-
-
 
