@@ -7,9 +7,12 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class CategoryTableViewController: UITableViewController {
+    
+    //set new Realm
+    let realm = try! Realm()
     
     var categories = [Category]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -48,10 +51,12 @@ class CategoryTableViewController: UITableViewController {
     
     
     //MARK: - Data Manipulation Methods - saveData/loadData
-    func saveCategories() {
+    func save(catergory: Category) {
         //items to have to Persistent Local Data Storage
         do {
-            try context.save()
+            try realm.write() {
+                realm.add(catergory)
+            }
         } catch {
             print("Error saving context \(error)")
         }
@@ -60,18 +65,21 @@ class CategoryTableViewController: UITableViewController {
         self.tableView.reloadData()
     }
     
-    //Reading DB so don't have to call context & saveItems - with internal & external paramater with default values
-    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
-        //must specify the data output type
+    func loadCategories() {
         
-        //fetches content from DB
-        do {
-            categories = try context.fetch(request)
-        } catch {
-            print("Error loading categories \(error)")
-        }
-        tableView.reloadData()
     }
+//    //Reading DB so don't have to call context & saveItems - with internal & external paramater with default values
+//    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
+//        //must specify the data output type
+//
+//        //fetches content from DB
+//        do {
+//            categories = try context.fetch(request)
+//        } catch {
+//            print("Error loading categories \(error)")
+//        }
+//        tableView.reloadData()
+//    }
     
     //MARK: - Add New Categories - using Category Intity
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -84,11 +92,11 @@ class CategoryTableViewController: UITableViewController {
             //what will happen once user clicked addCategoryButton on our alert
             
             //add new category to List
-            let newCategory = Category(context: self.context)
+            let newCategory = Category()
             newCategory.name = textField.text!
             self.categories.append(newCategory)
             
-            self.saveCategories()
+            self.save(catergory: newCategory)
         }
         
         //activate alert popup
