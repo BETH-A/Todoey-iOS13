@@ -14,8 +14,7 @@ class CategoryTableViewController: UITableViewController {
     //set new Realm
     let realm = try! Realm()
     
-    var categories = [Category]()
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    var categories: Results<Category>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,14 +24,16 @@ class CategoryTableViewController: UITableViewController {
     
     //MARK: - TableView Datasource Methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories.count
+        
+        //if categories is nil then return 1 row
+        return categories?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
         
-        cell.textLabel?.text = categories[indexPath.row].name
+        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added Yet"
         
         return cell
     }
@@ -45,7 +46,7 @@ class CategoryTableViewController: UITableViewController {
         let destimationVC = segue.destination as! ToDoListViewController
         
         if let indexPath = tableView.indexPathForSelectedRow {
-            destimationVC.selectedCategory = categories[indexPath.row]
+            destimationVC.selectedCategory = categories?[indexPath.row]
         }
     }
     
@@ -65,21 +66,14 @@ class CategoryTableViewController: UITableViewController {
         self.tableView.reloadData()
     }
     
+    //Reading DB so don't have to call context & saveItems - with internal & external paramater with default values
     func loadCategories() {
-        
+            
+        //fetches content from DB
+        categories = realm.objects(Category.self)
+
+        tableView.reloadData()
     }
-//    //Reading DB so don't have to call context & saveItems - with internal & external paramater with default values
-//    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
-//        //must specify the data output type
-//
-//        //fetches content from DB
-//        do {
-//            categories = try context.fetch(request)
-//        } catch {
-//            print("Error loading categories \(error)")
-//        }
-//        tableView.reloadData()
-//    }
     
     //MARK: - Add New Categories - using Category Intity
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -94,7 +88,6 @@ class CategoryTableViewController: UITableViewController {
             //add new category to List
             let newCategory = Category()
             newCategory.name = textField.text!
-            self.categories.append(newCategory)
             
             self.save(catergory: newCategory)
         }
