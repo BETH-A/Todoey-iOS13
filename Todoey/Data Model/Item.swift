@@ -14,5 +14,6 @@ class Item: Object {
     @objc dynamic var done: Bool = false
     @objc dynamic var dateCreated: Date?
     
+    //Creates inverse relationship that linkes each item back to the Category
     var parentCategory = LinkingObjects(fromType: Category.self, property: "items")
 }

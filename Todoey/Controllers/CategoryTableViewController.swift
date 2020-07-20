@@ -8,18 +8,35 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
-class CategoryTableViewController: UITableViewController {
+
+class CategoryTableViewController: SwipeTableViewController {
     
-    //set new Realm
+    //Initialzed  new Realm
     let realm = try! Realm()
     
+    //Changed from array to a collection of results
     var categories: Results<Category>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        //loads all categories we have
         loadCategories()
+        
+        tableView.separatorStyle = .none
+    
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        guard let navBar = navigationController?.navigationBar else {fatalError("Navigation controll does not exist.")
+            
+        }
+        
+        navBar.backgroundColor = UIColor(hexString: "862A5C")
+        
+        
     }
     
     //MARK: - TableView Datasource Methods
@@ -31,17 +48,31 @@ class CategoryTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        //taps into the cell from the Super Class
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
-        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added Yet"
+        if let category = categories?[indexPath.row] {
+            cell.textLabel?.text = category.name
+            
+            guard let categoryColor = UIColor(hexString: category.categoryColor) else {fatalError()}
+            
+            cell.backgroundColor = categoryColor
+        
+            cell.textLabel?.textColor = ContrastColorOf(categoryColor, returnFlat: true)
+        }
         
         return cell
     }
     
     //MARK: - TableView Delegate Methods
+    
+    //when we click on any cell a segue is created to take us to a VC of the selected cell
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "goToItems", sender: self)
     }
+    
+    
+    //creates new instance of destinatinVC
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let destimationVC = segue.destination as! ToDoListViewController
         
@@ -53,7 +84,7 @@ class CategoryTableViewController: UITableViewController {
     
     //MARK: - Data Manipulation Methods - saveData/loadData
     func save(catergory: Category) {
-        //items to have to Persistent Local Data Storage
+        //Commit items to have to Realm DB
         do {
             try realm.write() {
                 realm.add(catergory)
@@ -68,11 +99,25 @@ class CategoryTableViewController: UITableViewController {
     
     //Reading DB so don't have to call context & saveItems - with internal & external paramater with default values
     func loadCategories() {
-            
-        //fetches content from DB
+        
+        //Set catergories to fetches content from DB
         categories = realm.objects(Category.self)
-
+        
         tableView.reloadData()
+    }
+    
+    //MARK: - Delete Data from Swipe
+    override func updateModel(at indexPath: IndexPath) {
+        
+        if let categoryForDeletion = self.categories?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    self.realm.delete(categoryForDeletion)
+                }
+            } catch {
+                print("Error deleting category, \(error)")
+            }
+        }
     }
     
     //MARK: - Add New Categories - using Category Intity
@@ -106,8 +151,6 @@ class CategoryTableViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
         
     }
-    
-    //MARK: - Table Delegate Methods - Leave for now
     
 }
 
